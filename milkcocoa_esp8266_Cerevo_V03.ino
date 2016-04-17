@@ -1,3 +1,9 @@
+//mini4wd control with milkcocoa
+//Add LED light
+//Add BT Module Control
+//2016 April 18
+//Cerevo Inc.
+
 #include <ESP8266WiFi.h>
 #include <Milkcocoa.h>
 
@@ -11,8 +17,22 @@
 #define forward       0x01
 #define reverse       0x02
 
+//LED comunication inicator
 #define LED_H       (digitalWrite( 12, HIGH ))
 #define LED_L       (digitalWrite( 12, LOW ))
+//TP1 GPIO13
+#define BLED_H       (analogWrite( 13, 1023 ))
+#define BLED_M       (analogWrite( 13, 512 ))
+#define BLED_L       (analogWrite( 13, 0 ))
+//GPIO5(SW)
+#define MAIN_H       (digitalWrite( 5, HIGH ))
+#define MAIN_L       (digitalWrite( 5, LOW ))
+//GPIO2(Mode)
+#define VOLP_H       (digitalWrite( 2, HIGH ))
+#define VOLP_L       (digitalWrite( 2, LOW ))
+//GPIO15(Mode)
+#define VOLM_H       (digitalWrite( 15, HIGH ))
+#define VOLM_L       (digitalWrite( 15, LOW ))
 
 
 char state = command_stop;
@@ -20,14 +40,15 @@ int offset = 0;
 
 /************************* WiFi Access Point *********************************/
 
-#define WLAN_SSID       "--SSID--"        //自宅で使用のSSID名
-#define WLAN_PASS       "--PASS--"        //自宅で使用のSSID パスワード
+#define WLAN_SSID       "HG8045-734B-bg" //自宅で使用のSSID名
+#define WLAN_PASS       "u86s6ar9"       //自宅で使用のSSID パスワード
 
 
 /************************* Your Milkcocoa Setup *********************************/
 
-#define MILKCOCOA_APP_ID      "catimlk5yjv"   //milkcocoa idを記載
-#define MILKCOCOA_DATASTORE   "data"            //milkcocoa data store 名を記載
+
+#define MILKCOCOA_APP_ID      "catimlk5yjv"               //milkcocoa idを記載
+#define MILKCOCOA_DATASTORE   "ESP8266_Cerevo"            //milkcocoa data store 名を記載
 
 /************* Milkcocoa Setup (you don't need to change this!) ******************/
 
@@ -63,7 +84,14 @@ void onpush(DataElement *elem) {
     handle_back();
   }else if(command == 9){
     handle_r_right();
+  }else if(command == 4){
+    handle_btpower();
+  }else if(command == 5){
+    handle_btplus();
+  }else if(command == 6){
+    handle_btminus();
   }
+ 
 
   
 };
@@ -97,7 +125,15 @@ void setup() {
 
   pinMode(16,OUTPUT);
   pinMode(12,OUTPUT);
-  
+  pinMode(13,OUTPUT);
+  pinMode(5,OUTPUT);
+  pinMode(2,OUTPUT);
+  pinMode(15,OUTPUT); 
+  BLED_H;   
+  MAIN_L;
+  VOLP_L;
+  VOLM_L;
+    
   Serial.println( milkcocoa.on(MILKCOCOA_DATASTORE, "push", onpush) );
 };
 
@@ -111,6 +147,7 @@ void loop() {
 void handle_stop() {
   Serial.print("stop\r\n");
   LED_H;
+  BLED_H;
     stop_motor();
   LED_L;
     state = command_stop;
@@ -119,6 +156,7 @@ void handle_stop() {
 void handle_drive() {
  Serial.print("drive\r\n");
   LED_H;
+  BLED_M;
   drive();
   servo_control(90);
   LED_L;
@@ -126,18 +164,21 @@ void handle_drive() {
 
 void handle_back() {
   Serial.print("back\r\n");
+  BLED_M;  
   back();
   servo_control(90);
 }
 
 void handle_left(){
   Serial.print("left\r\n");
+  BLED_M;
    drive();
   servo_control(60);
 }
 
 void handle_right(){
   Serial.print("right\r\n");
+   BLED_M;
    drive();
   servo_control(120);
 }
@@ -146,6 +187,7 @@ void handle_right(){
 void handle_f_left(){
   Serial.print("f_left\r\n");
   LED_H;
+  BLED_M;
   drive();
   servo_control(60);
   LED_L;
@@ -155,6 +197,7 @@ void handle_f_left(){
 void handle_f_right(){
   Serial.print("f_right\r\n");
   LED_H;
+  BLED_M;
   drive();
   servo_control(120);
   LED_L;
@@ -163,6 +206,7 @@ void handle_f_right(){
 void handle_r_left(){
   Serial.print("r_left\r\n");
   LED_H;
+  BLED_M;
   back();
   servo_control(60);
   LED_L;
@@ -172,10 +216,35 @@ void handle_r_left(){
 void handle_r_right(){
   Serial.print("r_right\r\n");
   LED_H;
+  BLED_M;
   back();
   servo_control(120);
   LED_L;
 }
+
+
+void handle_btpower(){
+  Serial.print("BT Power ON:H wait 5sec\r\n");
+  MAIN_H;
+  delay(5000);
+  MAIN_L;
+  Serial.print("BT Power ON:L\r\n");
+}
+
+void handle_btplus(){
+  Serial.print("BT VOL+ \r\n");
+  VOLP_H;
+  delay(1000);
+  VOLP_L;
+}
+
+void handle_btminus(){
+  Serial.print("BT VOL- \r\n");
+  VOLM_H;
+  delay(1000);
+  VOLM_L;
+}
+
 
 void drive(){
     if(state == command_back){

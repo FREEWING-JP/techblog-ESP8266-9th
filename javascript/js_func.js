@@ -1,4 +1,4 @@
-var milkcocoa = new MilkCocoa('yieldimlxufzf.mlkcca.com');
+var milkcocoa = new MilkCocoa('--app_if--.mlkcca.com');
 
 function koshin(){
 	window.alert("Hello!");
@@ -6,7 +6,7 @@ function koshin(){
 
 function send(command){
 
-	milkcocoa.dataStore('data').push({'com':command});
+	milkcocoa.dataStore('--app_name--').push({'com':command});
 }
 
 
