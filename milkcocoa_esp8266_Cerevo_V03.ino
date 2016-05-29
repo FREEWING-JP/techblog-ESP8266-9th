@@ -41,7 +41,7 @@ int offset = 0;
 /************************* WiFi Access Point *********************************/
 
 #define WLAN_SSID       "HG8045-734B-bg" //自宅で使用のSSID名
-#define WLAN_PASS       "u86s6ar9"       //自宅で使用のSSID パスワード
+#define WLAN_PASS       "********"       //自宅で使用のSSID パスワード
 
 
 /************************* Your Milkcocoa Setup *********************************/
